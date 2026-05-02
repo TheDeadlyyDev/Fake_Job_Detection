@@ -1,0 +1,19 @@
+# Fake Job Detection System - Python Dependencies
+# ================================================
+# Install dependencies using: pip install -r requirements.txt
+
+# Web Framework
+Flask==3.0.0
+
+# Database Connector
+mysql-connector-python==8.2.0
+
+# Password Hashing
+Werkzeug==3.0.1
+
+# Additional utilities (included with Flask but listed for clarity)
+# - Jinja2 (templating engine)
+# - MarkupSafe (security for templates)
+# - click (CLI support)
+# - itsdangerous (secure token generation)
+# - blinker (signals support)
