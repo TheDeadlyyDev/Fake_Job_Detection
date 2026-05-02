@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Fake Job Detection – Control Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('fakejob-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="saas-root">
+<div class="saas-shell">
+    <!-- Sidebar -->
+    <aside class="saas-sidebar" data-state="expanded">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <span class="logo-mark"><i class="fas fa-shield-alt"></i></span>
+                <span class="logo-text">Fake Job AI</span>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="nav-item active" data-view="dashboard">
+                <span class="nav-icon"><i class="fas fa-chart-bar"></i></span>
+                <span class="nav-label">Dashboard</span>
+            </button>
+            <button class="nav-item" data-view="analysis">
+                <span class="nav-icon"><i class="fas fa-brain"></i></span>
+                <span class="nav-label">Job Analysis</span>
+            </button>
+            <button class="nav-item" data-view="reports">
+                <span class="nav-icon"><i class="fas fa-file-alt"></i></span>
+                <span class="nav-label">Reports</span>
+            </button>
+            <button class="nav-item" data-view="about">
+                <span class="nav-icon"><i class="fas fa-info-circle"></i></span>
+                <span class="nav-label">About</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main column -->
+    <div class="saas-main">
+        <!-- Top navbar -->
+        <header class="saas-topbar">
+            <div class="topbar-left">
+                <h1 class="topbar-title" id="viewTitle">Dashboard</h1>
+                <p class="topbar-subtitle" id="viewSubtitle">
+                    High‑level overview of job fraud risk.
+                </p>
+            </div>
+            <div class="topbar-right">
+                <button type="button" class="theme-toggle theme-toggle--compact" id="saasThemeToggle" aria-label="Toggle light and dark theme" title="Switch theme">
+                    <span class="theme-toggle-track" aria-hidden="true">
+                        <span class="theme-toggle-slot">
+                            <svg class="theme-svg theme-svg-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+                                <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                            </svg>
+                        </span>
+                        <span class="theme-toggle-slot">
+                            <svg class="theme-svg theme-svg-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                            </svg>
+                        </span>
+                    </span>
+                </button>
+                <div class="topbar-user">
+                    <div class="user-avatar">{{ (session.username or 'A')[:1] if session.username else 'A' }}</div>
+                    <div class="user-meta">
+                        <span class="user-name">{{ session.username or 'Admin' }}</span>
+                        <span class="user-role">
+                            {{ 'Administrator' if session.get('user_type') == 'admin' else 'Employer' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- View container – full screen, no scroll -->
+        <main class="saas-views" aria-live="polite">
+            <!-- Dashboard -->
+            <section class="saas-view active" data-view="dashboard">
+                <div class="dashboard-grid">
+                    <!-- 4 analytics cards (2x2) -->
+                    <div class="analyt-card">
+                        <h3>Total Jobs</h3>
+                        <p class="analyt-value">{{ jobs_count if jobs_count is defined else '128' }}</p>
+                        <p class="analyt-meta">Tracked across all employers</p>
+                    </div>
+                    <div class="analyt-card">
+                        <h3>High‑risk Jobs</h3>
+                        <p class="analyt-value analyt-danger">{{ high_risk_count if high_risk_count is defined else '7' }}</p>
+                        <p class="analyt-meta">Flagged for urgent review</p>
+                    </div>
+                    <div class="analyt-card">
+                        <h3>Suspicious Rate</h3>
+                        <p class="analyt-value">{{ suspicious_rate if suspicious_rate is defined else '12%' }}</p>
+                        <p class="analyt-meta">Of all active postings</p>
+                    </div>
+                    <div class="analyt-card">
+                        <h3>Last 24h Activity</h3>
+                        <p class="analyt-value">{{ last_24h_count if last_24h_count is defined else '19' }}</p>
+                        <p class="analyt-meta">New & updated listings</p>
+                    </div>
+                </div>
+
+                <!-- Risk analytics strip -->
+                <div class="risk-panel">
+                    <div class="risk-chart-placeholder">
+                        <p>Risk distribution over time</p>
+                        <div class="risk-bars">
+                            <span class="bar bar-low"></span>
+                            <span class="bar bar-med"></span>
+                            <span class="bar bar-high"></span>
+                        </div>
+                    </div>
+                    <div class="risk-insights">
+                        <h3>Risk Insights</h3>
+                        <ul>
+                            <li>Most high‑risk jobs use free email domains.</li>
+                            <li>Unspecified location strongly correlates with fake patterns.</li>
+                            <li>“Urgent hiring” appears in 60% of flagged postings.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Job Analysis -->
+            <section class="saas-view" data-view="analysis">
+                <div class="analysis-layout">
+                    <form class="analysis-form">
+                        <h2>Quick Job Analysis</h2>
+                        <p class="section-caption">
+                            Paste a job description and metadata to estimate fraud risk.
+                        </p>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Company Email</label>
+                                <input class="form-input" type="email" placeholder="hiring@company.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Offered Salary (USD)</label>
+                                <input class="form-input" type="number" min="0" step="1000" placeholder="Example: 80000">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Location</label>
+                                <input class="form-input" type="text" placeholder="City, Country">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contact Details</label>
+                                <input class="form-input" type="text" placeholder="Phone, alt email, etc.">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Job Description</label>
+                            <textarea class="form-textarea" rows="5"
+                                      placeholder="Paste the full job description here..."></textarea>
+                        </div>
+
+                        <button type="button" class="btn btn-primary">Run Analysis</button>
+                    </form>
+
+                    <aside class="analysis-result">
+                        <div class="result-card">
+                            <h2>Analysis Result</h2>
+                            <p class="result-score-label">Risk Score</p>
+                            <p class="result-score">0 / 10</p>
+                            <span class="result-chip result-chip-safe">Genuine</span>
+
+                            <div class="result-insights">
+                                <h3>Key Signals</h3>
+                                <ul>
+                                    <li>No suspicious keywords detected.</li>
+                                    <li>Corporate email domain in use.</li>
+                                    <li>Location is specified.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- Reports -->
+            <section class="saas-view" data-view="reports">
+                <div class="reports-shell">
+                    <div class="reports-header">
+                        <div>
+                            <h2>Detection Reports</h2>
+                            <p class="section-caption">Recent job evaluations with their classification.</p>
+                        </div>
+                        <!-- You can add filters here later -->
+                    </div>
+
+                    <div class="reports-table-card">
+                        <table class="reports-table">
+                            <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Company</th>
+                                <th>Score</th>
+                                <th>Label</th>
+                                <th>Created</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if jobs is defined %}
+                                {% for job in jobs %}
+                                    <tr>
+                                        <td>{{ job.job_title }}</td>
+                                        <td>{{ job.company_name }}</td>
+                                        <td>{{ job.detection_score }}</td>
+                                        <td>{{ job.classification }}</td>
+                                        <td>{{ job.created_at.strftime('%Y-%m-%d') if job.created_at else 'N/A' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5">Connect this table to your jobs data.</td>
+                                </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About -->
+            <section class="saas-view" data-view="about">
+                <div class="about-shell">
+                    <h2>About Fake Job AI</h2>
+                    <p class="section-caption">
+                        Enterprise‑grade rule‑based detection for fraudulent job postings.
+                    </p>
+                    <div class="about-grid">
+                        <div class="about-card">
+                            <h3>Why it exists</h3>
+                            <p>
+                                Fake Job AI helps organizations protect candidates from scam postings by enforcing
+                                risk policies and highlighting anomalous patterns before jobs go live.
+                            </p>
+                        </div>
+                        <div class="about-card">
+                            <h3>How detection works</h3>
+                            <p>
+                                A weighted rules engine evaluates email domains, compensation ranges, language cues,
+                                and missing fields to produce an interpretable risk score.
+                            </p>
+                        </div>
+                        <div class="about-card">
+                            <h3>Deployment ready</h3>
+                            <p>
+                                Designed as an internal SaaS dashboard that can be integrated with your ATS or career
+                                site pipeline.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+    // View switching
+    const navItems = document.querySelectorAll('.nav-item');
+    const views = document.querySelectorAll('.saas-view');
+    const viewTitle = document.getElementById('viewTitle');
+    const viewSubtitle = document.getElementById('viewSubtitle');
+
+    const meta = {
+        dashboard: {
+            title: 'Dashboard',
+            subtitle: 'High‑level overview of job fraud risk.'
+        },
+        analysis: {
+            title: 'Job Analysis',
+            subtitle: 'Run quick, on‑demand risk checks for a single posting.'
+        },
+        reports: {
+            title: 'Reports',
+            subtitle: 'Browse historical detection results and classifications.'
+        },
+        about: {
+            title: 'About',
+            subtitle: 'Learn how Fake Job AI protects your hiring pipeline.'
+        }
+    };
+
+    navItems.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-view');
+
+            navItems.forEach(b => b.classList.toggle('active', b === btn));
+            views.forEach(view => {
+                const isActive = view.getAttribute('data-view') === target;
+                view.classList.toggle('active', isActive);
+            });
+
+            if (meta[target]) {
+                viewTitle.textContent = meta[target].title;
+                viewSubtitle.textContent = meta[target].subtitle;
+            }
+        });
+    });
+
+    // Sidebar collapse
+    const sidebar = document.querySelector('.saas-sidebar');
+    const shell = document.querySelector('.saas-shell');
+    const toggle = document.getElementById('sidebarToggle');
+
+    function updateToggleIcon() {
+        const icon = toggle.querySelector('i');
+        if (!icon) return;
+        const collapsed = sidebar.dataset.state === 'collapsed';
+        icon.classList.toggle('fa-chevron-left', !collapsed);
+        icon.classList.toggle('fa-chevron-right', collapsed);
+    }
+
+    // initialize icon on load
+    updateToggleIcon();
+
+    toggle.addEventListener('click', () => {
+        const collapsed = sidebar.dataset.state === 'collapsed';
+        sidebar.dataset.state = collapsed ? 'expanded' : 'collapsed';
+        shell.classList.toggle('sidebar-collapsed', !collapsed);
+        updateToggleIcon();
+    });
+
+    (function () {
+        var btn = document.getElementById('saasThemeToggle');
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+            var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            try { localStorage.setItem('fakejob-theme', next); } catch (e) {}
+        });
+    })();
+</script>
+</body>
+</html>

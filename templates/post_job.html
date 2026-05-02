@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Post Job - Fake Job Detection System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Post a New Job</h1>
+        <p>Fill in the details below to post a new job listing. Our system will automatically analyze it for potential fraud indicators.</p>
+    </div>
+
+    <div class="form-card">
+        <form id="postJobForm" method="POST" action="{{ url_for('post_job') }}" class="job-form">
+            <!-- Company Name -->
+            <div class="form-group">
+                <label for="company_name" class="form-label">Company Name <span class="required">*</span></label>
+                <input type="text" 
+                       id="company_name" 
+                       name="company_name" 
+                       class="form-input" 
+                       placeholder="Enter company name"
+                       required>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email" class="form-label">Email <span class="required">*</span></label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       class="form-input" 
+                       placeholder="company@example.com"
+                       required>
+            </div>
+
+            <!-- Job Title -->
+            <div class="form-group">
+                <label for="job_title" class="form-label">Job Title <span class="required">*</span></label>
+                <input type="text" 
+                       id="job_title" 
+                       name="job_title" 
+                       class="form-input" 
+                       placeholder="e.g., Software Engineer"
+                       required>
+            </div>
+
+            <!-- Salary and Location Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="salary" class="form-label">Salary ($)</label>
+                    <input type="number" 
+                           id="salary" 
+                           name="salary" 
+                           class="form-input" 
+                           placeholder="e.g., 50000"
+                           min="0"
+                           step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" 
+                           id="location" 
+                           name="location" 
+                           class="form-input" 
+                           placeholder="e.g., New York, NY">
+                </div>
+            </div>
+
+            <!-- Job Description -->
+            <div class="form-group">
+                <label for="job_description" class="form-label">Job Description <span class="required">*</span></label>
+                <textarea id="job_description" 
+                          name="job_description" 
+                          class="form-textarea" 
+                          rows="6"
+                          placeholder="Describe the job responsibilities, requirements, and benefits..."
+                          required></textarea>
+            </div>
+
+            <!-- Contact Details -->
+            <div class="form-group">
+                <label for="contact_details" class="form-label">Contact Details</label>
+                <textarea id="contact_details" 
+                          name="contact_details" 
+                          class="form-textarea" 
+                          rows="3"
+                          placeholder="Additional contact information (phone, address, etc.)"></textarea>
+            </div>
+
+            <!-- Info Box -->
+            <div class="info-box">
+                <strong><i class="fas fa-info-circle"></i> Detection Criteria:</strong>
+                <ul>
+                    <li>Gmail/Yahoo emails: +2 points</li>
+                    <li>Salary > $100,000: +2 points</li>
+                    <li>Keywords (fee, registration, urgent hiring): +3 points</li>
+                    <li>Empty location: +1 point</li>
+                </ul>
+                <p><strong>Classification:</strong> 0-2 = Genuine, 3-5 = Suspicious, 6+ = Fake</p>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Post Job</button>
+                <a href="{{ url_for('job_list') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

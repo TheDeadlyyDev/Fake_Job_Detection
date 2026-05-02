@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Fake Job Detection System{% endblock %}</title>
+    <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('fakejob-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for consistent icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pQ4We1gW7AX0JlY3mw0Y56/2c0bvMZVx0z3mXBl9Ti9iG1HfjOmNbFxeWPe7Eut4kz8hkWqWyh9HLE6SKC6jTw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="app-shell">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-search"></i> Fake Job Detection</h1>
+            </div>
+            <div class="nav-links">
+                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Switch theme">
+                    <span class="theme-toggle-track" aria-hidden="true">
+                        <span class="theme-toggle-slot">
+                            <svg class="theme-svg theme-svg-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+                                <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                            </svg>
+                        </span>
+                        <span class="theme-toggle-slot">
+                            <svg class="theme-svg theme-svg-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                            </svg>
+                        </span>
+                    </span>
+                </button>
+                {% if session.user_id %}
+                    {% if session.user_type == 'admin' %}
+                        <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('job_list') }}" class="nav-link">My Jobs</a>
+                        <a href="{{ url_for('post_job') }}" class="nav-link">Post Job</a>
+                    {% endif %}
+                    <span class="nav-user">Welcome, {{ session.username }}</span>
+                    <a href="{{ url_for('logout') }}" class="nav-link btn-logout">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+                    <a href="{{ url_for('register') }}" class="nav-link">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Fake Job Detection System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+    (function () {
+      var btn = document.getElementById('themeToggle');
+      if (!btn) return;
+      function applyIcon() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+      }
+      btn.addEventListener('click', function () {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('fakejob-theme', next); } catch (e) {}
+        applyIcon();
+      });
+      applyIcon();
+    })();
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

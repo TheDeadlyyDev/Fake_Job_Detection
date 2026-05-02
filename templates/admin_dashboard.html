@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Fake Job Detection System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Admin Dashboard</h1>
+        <p>Monitor and manage all job postings</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon stat-genuine"><span class="stat-icon-symbol" aria-hidden="true">&#10003;</span></div>            <div class="stat-content">
+                <h3>{{ stats.get('Genuine', 0) }}</h3>
+                <p>Genuine Jobs</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-suspicious"><span class="stat-icon-symbol" aria-hidden="true">&#9888;</span></div>            <div class="stat-content">
+                <h3>{{ stats.get('Suspicious', 0) }}</h3>
+                <p>Suspicious Jobs</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-fake"><span class="stat-icon-symbol" aria-hidden="true">&#10005;</span></div>            <div class="stat-content">
+                <h3>{{ stats.get('Fake', 0) }}</h3>
+                <p>Fake Jobs</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-total"><span class="stat-icon-symbol" aria-hidden="true">&#128202;</span></div>            <div class="stat-content">
+                <h3>{{ jobs|length }}</h3>
+                <p>Total Jobs</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="filter-section">
+        <h2>Filter by Classification</h2>
+        <div class="filter-buttons">
+            <a href="{{ url_for('admin_dashboard', filter='all') }}" 
+               class="filter-btn {% if filter_classification == 'all' %}active{% endif %}">
+                All Jobs
+            </a>
+            <a href="{{ url_for('admin_dashboard', filter='Genuine') }}" 
+               class="filter-btn {% if filter_classification == 'Genuine' %}active{% endif %}">
+                Genuine
+            </a>
+            <a href="{{ url_for('admin_dashboard', filter='Suspicious') }}" 
+               class="filter-btn {% if filter_classification == 'Suspicious' %}active{% endif %}">
+                Suspicious
+            </a>
+            <a href="{{ url_for('admin_dashboard', filter='Fake') }}" 
+               class="filter-btn {% if filter_classification == 'Fake' %}active{% endif %}">
+                Fake
+            </a>
+        </div>
+    </div>
+
+    <!-- Jobs Table -->
+    {% if jobs %}
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Email</th>
+                        <th>Salary</th>
+                        <th>Location</th>
+                        <th>Score</th>
+                        <th>Classification</th>
+                        <th>Employer</th>
+                        <th>Posted Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                        <tr class="job-row job-row-{{ job.classification.lower() }}">
+                            <td>{{ job.id }}</td>
+                            <td class="job-title-cell">{{ job.job_title }}</td>
+                            <td>{{ job.company_name }}</td>
+                            <td>{{ job.email }}</td>
+                            <td>{% if job.salary %}${{ "{:,.2f}".format(job.salary) }}{% else %}N/A{% endif %}</td>
+                            <td>{% if job.location %}{{ job.location }}{% else %}<span class="text-muted">Empty</span>{% endif %}</td>
+                            <td><span class="score-badge">{{ job.detection_score }}</span></td>
+                            <td>
+                                <span class="job-badge badge-{{ job.classification.lower() }}">
+                                    {{ job.classification }}
+                                </span>
+                            </td>
+                            <td>{{ job.employer_username }}</td>
+                            <td>{{ job.created_at.strftime('%Y-%m-%d %H:%M') if job.created_at else 'N/A' }}</td>
+                            <td>
+                                {% if job.id %}
+                                <button class="btn btn-danger btn-sm delete-job-btn" 
+                                        data-job-id="{{ job.id }}"
+                                        title="Delete Job">
+                                    Delete
+                                </button>
+                                {% else %}
+                                <button class="btn btn-danger btn-sm" 
+                                        disabled
+                                        title="Invalid Job ID">
+                                    Delete
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h2>No Jobs Found</h2>
+            <p>{% if filter_classification != 'all' %}No {{ filter_classification.lower() }} jobs found.{% else %}No jobs have been posted yet.{% endif %}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Delete job function - using event delegation for better performance
+    document.addEventListener('DOMContentLoaded', function() {
+        // Attach click handlers to all delete buttons
+        const deleteButtons = document.querySelectorAll('.delete-job-btn');
+        
+        deleteButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                const jobId = this.getAttribute('data-job-id');
+                
+                // Validate job ID
+                if (!jobId || jobId === '' || jobId === '0') {
+                    alert('Invalid job ID. Cannot delete this job.');
+                    return;
+                }
+                
+                // Confirm deletion
+                if (confirm('Are you sure you want to delete this job posting? This action cannot be undone.')) {
+                    // Create a form to submit POST request
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/admin/delete_job/${jobId}`;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

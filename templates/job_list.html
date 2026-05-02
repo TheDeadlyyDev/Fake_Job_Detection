@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}My Jobs - Fake Job Detection System{% endblock %}
+
+{% block content %}
+<!-- Hero section for My Jobs page -->
+<section class="jobs-hero">
+    <div class="container jobs-hero-inner">
+        <div class="jobs-hero-content">
+            <h1 class="jobs-hero-title">Your hiring hub, at a glance</h1>
+            <p class="jobs-hero-subtitle">
+                Track every job you’ve posted, monitor fake-job detection scores,
+                and keep candidates safe with our rule-based screening.
+            </p>
+            <div class="jobs-hero-actions">
+                <a href="{{ url_for('post_job') }}" class="btn btn-primary">+ Post New Job</a>
+                <a href="#jobs-insights" class="btn btn-secondary btn-outline">View insights</a>
+            </div>
+        </div>
+        <div class="jobs-hero-highlight">
+            <div class="highlight-card">
+                <p class="highlight-label">Detection overview</p>
+                <ul class="highlight-list">
+                    <li><span class="dot dot-genuine"></span> Genuine jobs are flagged in green</li>
+                    <li><span class="dot dot-suspicious"></span> Suspicious jobs get an amber warning</li>
+                    <li><span class="dot dot-fake"></span> High‑risk jobs are clearly marked as fake</li>
+                </ul>
+                <p class="highlight-footnote">Scores are calculated automatically each time you post.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key points / benefits strip -->
+<section id="jobs-insights" class="jobs-keypoints">
+    <div class="container">
+        <div class="keypoints-grid">
+            <div class="keypoint-card">
+                <h3>At‑a‑glance risk</h3>
+                <p>Color‑coded badges and scores help you instantly see which jobs require extra review.</p>
+            </div>
+            <div class="keypoint-card">
+                <h3>Candidate trust</h3>
+                <p>Clean, genuine postings improve trust and reduce the risk of applicants reporting scams.</p>
+            </div>
+            <div class="keypoint-card">
+                <h3>Actionable insights</h3>
+                <p>Use detection scores to refine your descriptions, salary ranges, and contact details.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container jobs-list-section">
+    <div class="page-header">
+        <div>
+            <h2>My Job Postings</h2>
+            <p>View and manage all your posted jobs in one place.</p>
+        </div>
+        <a href="{{ url_for('post_job') }}" class="btn btn-primary">+ Post New Job</a>
+    </div>
+
+    {% if jobs %}
+        <div class="jobs-grid">
+            {% for job in jobs %}
+                <div class="job-card job-{{ job.classification.lower() }}">
+                    <div class="job-card-header">
+                        <h3 class="job-title">{{ job.job_title }}</h3>
+                        <span class="job-badge badge-{{ job.classification.lower() }}">{{ job.classification }}</span>
+                    </div>
+                    
+                    <div class="job-card-body">
+                        <div class="job-info">
+                            <p class="job-company"><strong>Company:</strong> {{ job.company_name }}</p>
+                            <p class="job-email"><strong>Email:</strong> {{ job.email }}</p>
+                            {% if job.salary %}
+                                <p class="job-salary"><strong>Salary:</strong> ${{ "{:,.2f}".format(job.salary) }}</p>
+                            {% endif %}
+                            {% if job.location %}
+                                <p class="job-location"><strong>Location:</strong> {{ job.location }}</p>
+                            {% else %}
+                                <p class="job-location text-muted"><strong>Location:</strong> Not specified</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="job-description">
+                            <p><strong>Description:</strong></p>
+                            <p>{{ job.job_description[:200] }}{% if job.job_description|length > 200 %}...{% endif %}</p>
+                        </div>
+                        
+                        {% if job.contact_details %}
+                            <div class="job-contact">
+                                <p><strong>Contact:</strong> {{ job.contact_details }}</p>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="job-meta">
+                            <p class="job-score"><strong>Detection Score:</strong> {{ job.detection_score }} points</p>
+                            <p class="job-date">Posted: {{ job.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h2>No Jobs Posted Yet</h2>
+            <p>Start by posting your first job listing!</p>
+            <a href="{{ url_for('post_job') }}" class="btn btn-primary">Post Your First Job</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
