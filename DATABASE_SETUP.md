@@ -76,11 +76,11 @@ If automatic setup doesn't work, you can manually create the database:
 1. Open MySQL command line or phpMyAdmin
 2. Create database:
    ```sql
-   CREATE DATABASE nozomi.proxy.rlwy.net;
+   CREATE DATABASE railway;
    ```
 3. Run the schema:
    ```bash
-   mysql -u root -p fake_job_detection < database/schema.sql
+   mysql -u root -p railway < database/schema.sql
    ```
 
 ## Testing Connection
@@ -95,4 +95,4 @@ python test_db_connection.py
 Once database is connected:
 1. Create admin account: `python create_admin.py`
 2. Run Flask app: `python app.py`
-3. Access at: `http://localhost:5000`
+3. Access at: `mysql://root:SGsrgeCOmdHqQgDPNAcdXZLiNCYtMOuD@nozomi.proxy.rlwy.net:23220/railway`
