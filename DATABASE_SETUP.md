@@ -76,7 +76,7 @@ If automatic setup doesn't work, you can manually create the database:
 1. Open MySQL command line or phpMyAdmin
 2. Create database:
    ```sql
-   CREATE DATABASE fake_job_detection;
+   CREATE DATABASE nozomi.proxy.rlwy.net;
    ```
 3. Run the schema:
    ```bash
