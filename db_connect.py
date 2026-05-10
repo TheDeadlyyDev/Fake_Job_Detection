@@ -2,10 +2,11 @@ import mysql.connector
 
 try:
     conn = mysql.connector.connect(
-        host="localhost",
+        host="nozomi.proxy.rlwy.net",
         user="root",
-        password="Ammu8610@",
-        database="fake_job_detection"
+        password="YOUR_PASSWORD",
+        port=23220
+        database="railway"
     )
 
     if conn.is_connected():
