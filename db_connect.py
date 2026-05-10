@@ -4,7 +4,7 @@ try:
     conn = mysql.connector.connect(
         host="nozomi.proxy.rlwy.net",
         user="root",
-        password="YOUR_PASSWORD",
+        password="SGsrgeCOmdHqQgDPNAcdXZLiNCYtMOuD",
         port=23220
         database="railway"
     )
